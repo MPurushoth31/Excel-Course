@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const frames=$$('.topic-frame'),items=$$('.lesson-item'),dots=$('#lessonDots');
+const frames=$$('.topic-frame'),items=$$('.lesson-item'),dots=$('#lessonDots'),chapterGroups=$$('.chapter-group'),chapterToggles=$$('.chapter-toggle');
 const titles=['What is Excel?','Why Learn Excel','Advantages & Disadvantages','Excel Fundamentals / Basic Terminology','Understanding the Excel Worksheet','Workbook vs Worksheet','Data Types','Excel File Formats'];
 const subtitles=['About Microsoft Excel','Career value & real-world use','Power & limitations','Basic terminology','Rows, columns, cells & grid','File vs individual sheet','How Excel reads values','XLSX, XLSM, CSV & more'];
 let current=0;
@@ -44,16 +44,40 @@ function injectResponsiveSafety(doc){
  }
  @media (max-width:760px){
    .section-shell,.shell{width:min(100% - 24px,1180px)!important}
-   .hero{grid-template-columns:1fr!important;min-height:auto!important;padding:48px 0!important}
-   .hero-visual{height:430px!important;min-height:0!important}
-   .concept-grid,.use-grid,.term-grid,.parts-grid,.options,.practice-options{grid-template-columns:1fr!important}
-   .why-card,.anatomy-layout,.parts-layout,.term-layout,.board-body,.journey-card,.definition{grid-template-columns:1fr!important}
+   .hero{grid-template-columns:1fr!important;min-height:auto!important;height:auto!important;padding:34px 0 38px!important;gap:24px!important}
+   .hero h1{font-size:clamp(42px,12vw,62px)!important;line-height:.92!important;letter-spacing:-.045em!important}
+   .hero-lead{font-size:14px!important;line-height:1.72!important}
+   .hero-pills{gap:6px!important;margin:18px 0!important}
+   .hero-pills span{font-size:9px!important;padding:7px 9px!important}
+   .hero-actions{flex-wrap:wrap!important;gap:8px!important}
+   .primary-btn,.ghost-btn{padding:11px 13px!important;font-size:10px!important}
+   .hero-visual{height:auto!important;min-height:280px!important;max-height:none!important;margin:4px 0 0!important;transform:none!important;overflow:visible!important}
+   .excel-stage{width:min(360px,96vw)!important;border-radius:30px!important;padding-top:34px!important}
+   .stage-title{font-size:32px!important}.stage-sub{font-size:10px!important}
+   .mini-sheet,.floating-card,.float-card{transform:scale(.82)!important}
+   .concept-grid,.use-grid,.term-grid,.parts-grid,.options,.practice-options,.format-grid,.compare-grid{grid-template-columns:1fr!important}
+   .why-card,.anatomy-layout,.parts-layout,.term-layout,.board-body,.journey-card,.definition,.map-detail,.limit-detail,.analysis-result,.formula-explain,.focus-panel{grid-template-columns:1fr!important}
    .address-demo{grid-template-columns:1fr!important}
    .workflow{overflow-x:auto!important;padding-bottom:8px}
-   .sheet-window,.grid-lab{overflow-x:auto!important}
+   .sheet-window,.grid-lab,.interactive-sheet,.practice-grid-wrap{overflow-x:auto!important;max-width:100%!important}
    .sheet-content,.interactive-sheet{max-width:100%!important}
    .demo-insight{border-left:0!important;border-top:1px solid #e2e9ee!important}
-   h1{letter-spacing:-.035em!important}
+   .formula-box{flex-wrap:wrap!important;font-size:22px!important;padding:18px!important}
+   .formula-box button{font-size:18px!important}
+   .formula-table{font-size:8px!important;overflow-x:auto}
+   .date-demo{grid-template-columns:1fr!important;gap:10px!important}.vs{margin:0 auto!important}
+   .filename{font-size:24px!important;max-width:100%!important;overflow:auto}.filename button{font-size:21px!important;white-space:nowrap}
+   .filename-detail{grid-template-columns:1fr!important}.part-example{text-align:left!important}
+   .type-layout,.adv-layout,.limit-layout,.decision{grid-template-columns:1fr!important}
+   .type-panel,.detail-panel,.term-panel,.format-panel,.part-detail{position:relative!important;top:auto!important;min-height:auto!important}
+   .type-grid,.card-grid,.term-grid,.format-grid{grid-template-columns:1fr 1fr!important}
+   .limit-list{grid-template-columns:1fr!important}
+   .compare-card{min-width:0!important}.versus{margin:8px auto!important}
+   .practice-options{grid-template-columns:1fr!important}
+   .takeaway,.summary{grid-template-columns:1fr!important}
+   .takeaway-art{height:220px!important}.takeaway h2,.summary h2{font-size:32px!important}
+   .fit-columns{grid-template-columns:1fr!important}
+   .mini-chain,.flow,.hero-tags{overflow-x:auto!important;flex-wrap:nowrap!important}
  }
  `;
  doc.head.appendChild(style);
@@ -115,6 +139,7 @@ function observeFrame(frame){
      injectResponsiveSafety(doc);
      addTamilPanel(doc,Number(frame.dataset.index||0));
      if(doc.fonts?.ready) doc.fonts.ready.then(()=>scheduleResize(frame)).catch(()=>{});
+     try{ if(doc.defaultView && !frame._ro){ frame._ro = new doc.defaultView.ResizeObserver(()=>scheduleResize(frame,40)); frame._ro.observe(doc.body); } }catch(e){}
      const target=doc.body||doc.documentElement;
      const mo=new MutationObserver(()=>scheduleResize(frame,30));
      if(target) mo.observe(target,{subtree:true,childList:true,characterData:true,attributes:true});
@@ -129,11 +154,14 @@ function observeFrame(frame){
  if(f.contentDocument?.readyState==='complete') onReady();
 }
 
-function updateUI(){items.forEach((b,i)=>{b.classList.toggle('active',i===current);b.classList.toggle('completed',state.completed?.includes(i))});$('#currentTitle').textContent=titles[current];$('#currentSubtitle').textContent=subtitles[current];const pct=Math.round(((current+1)/frames.length)*100);$('#progressText').textContent=`${current+1} of ${frames.length}`;$('#progressPct').textContent=pct+'%';$('#progressBar').style.width=pct+'%';$('#prevBtn').disabled=current===0;$('#nextBtn').textContent=current===frames.length-1?'Finish ✓':'Next →';$$('.lesson-dots button').forEach((b,i)=>b.classList.toggle('active',i===current));frames.forEach((f,i)=>f.classList.toggle('active',i===current));if(innerWidth<=760)closeDrawer();requestAnimationFrame(()=>scheduleResize(frames[current]))}
+function updateUI(){items.forEach((b,i)=>{b.classList.toggle('active',i===current);b.classList.toggle('completed',state.completed?.includes(i))});$('#currentTitle').textContent=titles[current];$('#currentSubtitle').textContent=subtitles[current];const pct=((current+1)/frames.length*100).toFixed(1);$('#progressText').textContent=`${current+1} of ${frames.length}`;$('#progressPct').textContent=pct+'%';$('#progressBar').style.width=pct+'%';$('#prevBtn').disabled=current===0;$('#nextBtn').textContent=current===frames.length-1?'Finish ✓':'Next →';$$('.lesson-dots button').forEach((b,i)=>b.classList.toggle('active',i===current));frames.forEach((f,i)=>f.classList.toggle('active',i===current));if(innerWidth<=760)closeDrawer();requestAnimationFrame(()=>scheduleResize(frames[current]))}
 function buildDots(){dots.innerHTML='';frames.forEach((_,i)=>{const b=document.createElement('button');b.title=`Go to 1.${i+1}`;b.setAttribute('aria-label',`Go to lesson 1.${i+1}`);b.onclick=()=>go(i);dots.appendChild(b)})}
-function go(i){current=Math.max(0,Math.min(frames.length-1,i));updateUI();window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>scheduleResize(frames[current]),120)}
+function go(i){current=Math.max(0,Math.min(frames.length-1,i));openChapterForLesson(current);updateUI();window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>scheduleResize(frames[current]),120)}
+function openChapterForLesson(i){const frame=frames[i];const group=document.querySelector('.chapter-group[data-chapter="1"]');if(group){group.classList.add('open');const toggle=group.querySelector('.chapter-toggle');if(toggle)toggle.setAttribute('aria-expanded','true')}}
 function markComplete(){if(!state.completed.includes(current))state.completed.push(current);save();updateUI()}
-frames.forEach((frame,i)=>{frame.dataset.index=i;observeFrame(frame)});items.forEach((b,i)=>b.onclick=()=>go(i));$('#prevBtn').onclick=()=>go(current-1);$('#nextBtn').onclick=()=>{if(current<frames.length-1){markComplete();go(current+1)}else{markComplete();toast('Chapter 01 completed ✓')}};
+frames.forEach((frame,i)=>{frame.dataset.index=i;observeFrame(frame)});
+chapterToggles.forEach(toggle=>toggle.addEventListener('click',()=>{const group=toggle.closest('.chapter-group');if(!group)return;const willOpen=!group.classList.contains('open');chapterGroups.forEach(g=>{g.classList.remove('open');const t=g.querySelector('.chapter-toggle');if(t)t.setAttribute('aria-expanded','false')});if(willOpen){group.classList.add('open');toggle.setAttribute('aria-expanded','true')}}));
+items.forEach((b,i)=>b.onclick=()=>go(i));$('#prevBtn').onclick=()=>go(current-1);$('#nextBtn').onclick=()=>{if(current<frames.length-1){markComplete();go(current+1)}else{markComplete();toast('Chapter 01 completed ✓')}};
 function openDrawer(){$('#lessonDrawer').classList.add('open');$('#overlay').classList.add('show')}function closeDrawer(){$('#lessonDrawer').classList.remove('open');$('#overlay').classList.remove('show')}
 $('#openLessons').onclick=openDrawer;$('#mobileMenu').onclick=openDrawer;$('#closeDrawer').onclick=closeDrawer;$('#overlay').onclick=closeDrawer;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();if(e.key==='ArrowRight'&&!e.target.matches('input,textarea,button,a'))go(current+1);if(e.key==='ArrowLeft'&&!e.target.matches('input,textarea,button,a'))go(current-1)});
