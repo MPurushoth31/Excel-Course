@@ -1,17 +1,34 @@
-# Excel Chapter 01 — Master Responsive Educational Website
+# Excel Chapter 01 — Professional Chapter Accordion Build
 
-All 8 original lesson documents are preserved inside one master HTML file.
+This build preserves the existing Chapter 01 lesson content and improves the course navigation structure.
 
-Lessons: 1.1 What is Excel / About Microsoft Excel, 1.2 Why Learn Excel, 1.3 Advantages & Disadvantages, 1.4 Excel Fundamentals / Basic Terminology, 1.5 Understanding the Excel Worksheet, 1.6 Workbook vs Worksheet, 1.7 Data Types, 1.8 Excel File Formats.
+## Current Chapter 01 lessons
+1.1 What is Excel?
+1.2 Why Learn Excel
+1.3 Advantages & Disadvantages
+1.4 Excel Fundamentals / Basic Terminology
+1.5 Understanding the Excel Worksheet
+1.6 Workbook vs Worksheet
+1.7 Data Types
+1.8 Excel File Formats
 
-Added without removing lesson content: responsive laptop/tablet/mobile shell, automatic iframe sizing, robust responsive safety, master Tamil Mix layer with natural Tamil-English explanations for every topic, chapter navigation, progress, completion, dark mode, and mobile lesson drawer.
+## Navigation architecture
+- Chapter-level accordion / dropdown structure
+- Chapter 01 contains all 8 current lessons
+- Chapter 02 is already represented as a collapsed expandable chapter placeholder
+- Future chapters can be added using the same `chapter-group` structure without changing Chapter 01 lesson content
+- Clicking a chapter expands/collapses its lesson list
+- Selecting a lesson updates the main lesson frame, title, subtitle, progress, navigation and completion state
+- Mobile drawer and desktop sidebar share the same chapter structure
 
-The Tamil Mix explanation is intentionally additive; the original English lesson content remains unchanged below it. Open index.html directly.
+## Other behavior preserved
+- Original embedded lesson content remains intact
+- Dynamic iframe height handling
+- Tamil Mix layer
+- Dark mode synchronization
+- Responsive desktop / tablet / mobile layout
+- Previous / Next navigation
+- Lesson progress and completion state
 
-
-## Responsive / iframe stability fixes
-- Removed the iframe/viewport height feedback loop caused by inner `100vh` hero sizing.
-- Lesson frames are dynamically sized to content and have no internal scrolling.
-- ResizeObserver feedback was removed; content changes use a debounced MutationObserver.
-- Laptop, tablet and mobile layouts remain responsive.
-- Original lesson srcdoc content is preserved; these fixes only affect hosting/responsiveness.
+## Run
+Open `index.html` directly in a modern browser.
